@@ -12,7 +12,7 @@ const Auction = require('../lib/models/Auction');
 
 const Bid = require('../lib/models/Bid');
 
-describe('basic-auth routes', () => {
+describe('auction routes', () => {
   beforeAll(async() => {
     const uri = await mongod.getUri();
     return connect(uri);
