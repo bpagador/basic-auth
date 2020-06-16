@@ -58,4 +58,91 @@ describe('basic-auth routes', () => {
         });
       });
   });
+
+  it('can get auction by id via GET', async() => {
+    const auction = await Auction.create({
+      user: user._id,
+      title: 'Old Relic',
+      description: 'relic found in the lost underwater city of Atlantis',
+      quantity: 1, 
+      endDate: Date()
+    });
+
+    Bid.create({
+      auction: auction.id,
+      user: user.id, 
+      price: 3000,
+      quantity: 1, 
+      isAccepted: true
+    });
+
+    return request(app)
+      .get(`/api/v1/auctions/${auction._id}`)
+      .then(res => {
+        expect(res.body).toEqual({
+          _id: expect.anything(),
+          description: auction.description,
+          endDate: expect.anything(),
+          quantity: auction.quantity,
+          title: auction.title,
+          user: {
+            _id: expect.anything(),
+            email: user.email
+          },
+          bids: [{
+            _id: expect.anything(),
+            auction: auction.id,
+            price: 3000 
+          }],
+          __v: 0
+
+        });
+      });
+  });
+
+  it('can get all auctions via GET', async() => {
+    await Auction.create({
+      user: user._id,
+      title: 'Old Relic',
+      description: 'relic found in the lost underwater city of Atlantis',
+      quantity: 1, 
+      endDate: Date()
+    },
+    {
+      user: user._id,
+      title: 'New Relic',
+      description: 'relic found in the middle of a mall, at the forever21',
+      quantity: 5, 
+      endDate: Date()
+    });
+
+    return request(app)
+      .get('/api/v1/auctions')
+      .then(res => {
+        expect(res.body).toEqual([
+          {
+            _id: expect.anything(),
+            user: {
+              _id: user.id
+            },
+            title: 'Old Relic',
+            description: 'relic found in the lost underwater city of Atlantis',
+            quantity: 1, 
+            endDate: expect.anything(),
+            __v: 0
+          },
+          {
+            _id: expect.anything(),
+            user: {
+              _id: user.id
+            },
+            title: 'New Relic',
+            description: 'relic found in the middle of a mall, at the forever21',
+            quantity: 5, 
+            endDate: expect.anything(),
+            __v: 0
+          }
+        ]);
+      });
+  });
 });
